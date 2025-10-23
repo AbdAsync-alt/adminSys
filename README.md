@@ -14,8 +14,10 @@ The main `.init` function takes 4 arguments: name, command-list, rank-list and p
       print(player.Name, "printed", argument1)
     end,
     arguments = {
-      type = "string",
-      required = true
+      {
+        type = "string",
+        required = true
+      }
     },
     rank = 5
   }
