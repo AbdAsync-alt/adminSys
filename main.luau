@@ -22,14 +22,13 @@ type additionalArgumentDataType = {
 
 type argumentType = {
     type: "player" | "int" | "decimal" | "string" | "team",
-	multi: boolean?,
     required: boolean?,
     additionalArgumentData: additionalArgumentDataType
 }
 
 type commandType = {
 	aliases: {string},
-    execute: (adminInstance, Player, unknown) -> (string?),
+    execute: (adminInstance, Player, unknown) -> (),
 	arguments: {argumentType}
 }
 
@@ -153,7 +152,7 @@ local function processArguments(player: Player, input: inputArguments, arguments
         local inputString = input[index]
         if (not inputString and argument.required) then return `Arugment {index} is required!`, true end 
         if not inputString then continue end 
-        
+
         local processFunction = argumentProcess[argument.type]
         local addionalArgumentData = argument.additionalArgumentData or {}
         if argument.type == "player" then table.insert(addionalArgumentData, player) end 
@@ -167,12 +166,11 @@ local function processArguments(player: Player, input: inputArguments, arguments
     return processedArguments
 end 
 
---// Module
+--// Module //--
 local module = {}
 module.__index = module
 
 function module.init(name: string, commands: commandsListType, rankList: rankListType, prefix: string)
-    --// Make sure arguments are valid
     local nameType = typeof(name)
 	local commandsType = typeof(commands)
 	local rankListType = typeof(rankList)
@@ -186,8 +184,10 @@ function module.init(name: string, commands: commandsListType, rankList: rankLis
 	assert(commands[1], "Commands should have atleast one command!")
 	assert(rankList[1], "Rank-list should have atleast one user!")
 
-	--// Iterate through commands & ranks
 	for index, command in commands do
+        local commandType = typeof(command)
+        assert(commandType == "table", `Command #{index} expected table but got {commandType}`)
+
         local aliasType = typeof(command.aliases)
         assert(aliasType == "table", `Command #{index} expected alias to be table but got {aliasType}`)
         assert(command.aliases[1], `Command #{index} expects atleast one alias!`)
@@ -204,6 +204,9 @@ function module.init(name: string, commands: commandsListType, rankList: rankLis
         --// Validate arguments
         if not command.arguments then continue end 
         for argumentIndex, argument in command.arguments do
+            local argumentSelfType = typeof(argument)
+            assert(argumentSelfType == "table", `Command #{index}, Argument #{argumentIndex} expected table but got {argumentSelfType}`)
+
             local argumentType = typeof(argument.type)
             assert(argumentType == "string", `Command #{index}, Argument #{argumentIndex} expected string but got {argumentType}`)
             assert(table.find({"player", "int", "decimal", "string", "extPlayer", "team"}, argument.type), `Command #{index}, Argument #{argumentIndex} needs to be 'player', 'int', 'decimal', 'string', 'extPlayer' or 'team'`) 
@@ -216,14 +219,12 @@ function module.init(name: string, commands: commandsListType, rankList: rankLis
         end 
 	end
 
-    --// Check if an instance already exists
     for _,instance: adminInstance in next, sharedTable.activeInstances do 
         if instance.name ~= name then continue end     
         warn("An admin instance with the same name was found and was overwritten")
         instance:destroy()
     end
 
-    --// Create instance
 	local self = setmetatable({}, module)
     self.connections = {}
     self.commands = commands
@@ -231,10 +232,8 @@ function module.init(name: string, commands: commandsListType, rankList: rankLis
     self.prefix = prefix
     self.name = name
 
-    --// Cache
     table.insert(sharedTable.activeInstances, self)
 
-    --// Connections
     local function initPlayer(player) 
         local connection = player.Chatted:Connect(function(str) 
            self:processCommand(player, str)
@@ -248,12 +247,10 @@ function module.init(name: string, commands: commandsListType, rankList: rankLis
 
     table.insert(self.connections, players.PlayerAdded:Connect(initPlayer))
 
-    --// Return instance
 	return self
 end
 
 function module:processCommand(player: Player, message: string)
-    --// Check if message begins with prefix
     if message:sub(1, #self.prefix) ~= self.prefix then return end 
     
     local rest = message:sub(#self.prefix+1)
@@ -286,4 +283,5 @@ function module:destroy()
     table.remove(sharedTable.activeInstances, ourIndex)
 end 
 
+--// Return module
 return module
