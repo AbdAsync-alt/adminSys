@@ -43,3 +43,26 @@ Currently adminSys supports 5 types of argument types:
 | decimal | 0.314 | 0.314 |
 | string | "Hello_world" | "Hello world" |
 | team | "guards" | {AbdAsync (Instance)} |
+
+Alternatively if your command can use two different argument types, you can do "player|int"
+The first argument for the `execute` function is the admin-instance, with a function named `addRank` which uses a userid (player) for the first argument and number (rank) for second
+```
+  local command = {
+	aliases = {"rank", "r"},
+	execute = function(self, player, argument1, argument2)
+		local target = argument1[1]
+		self:addRank(target.UserId, argument2)
+	end,
+	arguments = {
+		{
+			type = "player",
+			required = true
+		},
+		{
+			type = "int",
+			required = true
+		}
+	},
+	rank = 999
+}
+```
