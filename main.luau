@@ -21,7 +21,7 @@ type additionalArgumentDataType = {
 type argumentType = {
 	type: "player" | "int" | "decimal" | "string" | "team",
 	required: boolean?,
-	additionalArgumentData: additionalArgumentDataType
+	additionalArgumentData: additionalArgumentDataType?
 }
 
 type separateArguments = {string}
@@ -162,7 +162,7 @@ local function processArguments(player: Player, input: inputArguments, arguments
 			if type == "player" then  
 				addionalArgumentData.player = localPlayer
 			end 
-			
+
 			result = processFunction(inputString, addionalArgumentData)
 		end 
 
