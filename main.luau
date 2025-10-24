@@ -30,7 +30,8 @@ type commandType = {
 	aliases: {string},
 	execute: (adminInstance, Player, unknown) -> (),
 	arguments: {argumentType},
-	separateArguments: separateArguments
+	separateArguments: separateArguments,
+	rank: number
 }
 
 type commandsListType = {commandType}
@@ -62,7 +63,7 @@ local localPlayer = players.LocalPlayer
 
 --// General functions //--
 --// Argument type processes
-function argumentProcess.int(player: Player, input: string, additionalArgumentData: additionalArgumentDataType)
+function argumentProcess.int(input: string, additionalArgumentData: additionalArgumentDataType)
 	local number = tonumber(input)
 	if not number then return end 
 
@@ -72,7 +73,7 @@ function argumentProcess.int(player: Player, input: string, additionalArgumentDa
 	return math.round(number)
 end 
 
-function argumentProcess.decimal(player: Player, input: string, additionalArgumentData: additionalArgumentDataType)
+function argumentProcess.decimal(input: string, additionalArgumentData: additionalArgumentDataType)
 	local number = tonumber(input)
 	if not number then return end 
 
@@ -85,7 +86,7 @@ end
 function argumentProcess.player(input: string, additionalArgumentData: additionalArgumentDataType)
 	local lower = input:lower()
 	local player = additionalArgumentData.player
-
+	
 	local playerList = {}
 	if lower == "all" then
 		playerList = players:GetPlayers()
@@ -123,7 +124,7 @@ end
 --// Functions
 local function sendMessage(message: string, player: Player?) --// Might be an odd way to do this
 	if not localPlayer then return end 
-
+	
 	pcall(function() 
 		if player then
 			generalChat:SendAsync("/w "..player.DisplayName)
@@ -152,20 +153,20 @@ local function processArguments(player: Player, input: inputArguments, arguments
 	for index, argument in arguments do
 		local inputString = input[index]
 		local result 
-        for _,type in next, separateArguments do 
-            if (not inputString and argument.required) then return `Arugment {index} is required!`, true end 
-		    if not inputString then continue end 
+		for _,type in next, separateArguments[index] do 
+			if (not inputString and argument.required) then return `Arugment {index} is required!`, true end 
+			if not inputString then continue end 
 
-		    local processFunction = argumentProcess[type]
-		    local addionalArgumentData = argument.additionalArgumentData or {}
-		    if type == "player" then  
-                addionalArgumentData.player = localPlayer
-            end 
+			local processFunction = argumentProcess[type]
+			local addionalArgumentData = argument.additionalArgumentData or {}
+			if type == "player" then  
+				addionalArgumentData.player = localPlayer
+			end 
+			
+			result = processFunction(inputString, addionalArgumentData)
+		end 
 
-		    result = processFunction(inputString, addionalArgumentData)
-        end 
-
-        if (not result and argument.required) then return `Arugment {index} is not the proper type!`, true end 
+		if (not result and argument.required) then return `Arugment {index} is not the proper type!`, true end 
 		table.insert(processedArguments, result)
 	end 
 
@@ -207,25 +208,29 @@ function module.init(name: string, commands: commandsListType, rankList: rankLis
 		end 
 
 		if not command.arguments then continue end 
+		
+		local separateArguments = {}
+		command.separateArguments = separateArguments
 		for argumentIndex, argument in command.arguments do
 			local argumentSelfType = typeof(argument)
 			assert(argumentSelfType == "table", `Command #{index}, Argument #{argumentIndex} expected table but got {argumentSelfType}`)
 
-            local argumentType = typeof(argument.type)
+			local argumentType = typeof(argument.type)
 			assert(argumentType == "string", `Command #{index}, Argument #{argumentIndex} expected string but got {argumentType}`)
 
 			local split = argument.type:split("|")
-            local separateArguments = {}
-            command.separateArguments = separateArguments
-
-            for _,type in next, split do 
-			    assert(table.find({"player", "int", "decimal", "string", "extPlayer", "team"}, type), `Command #{index}, Argument #{argumentIndex} type needs to be 'player', 'int', 'decimal', 'string', 'extPlayer' or 'team'`) 
-                table.insert(separateArguments, type)
-			    if ((argument.type == "int" or argument.type == "decimal") and argument.maxLength and argument.minLength) then 
-			    	local valid = if argument.minLength > argument.maxLength then "min > max" elseif argument.maxLength < argument.minLength then "max < min" else nil
-			    	assert(not valid, `Command #{index}, Argument #{argumentIndex} has invalid range ({valid})`)
-			    end 
-            end
+			
+			local typeSeparate = {}
+			table.insert(separateArguments, typeSeparate)
+			for _,type in next, split do 
+				assert(table.find({"player", "int", "decimal", "string", "extPlayer", "team"}, type), `Command #{index}, Argument #{argumentIndex} type needs to be 'player', 'int', 'decimal', 'string', 'extPlayer' or 'team'`) 
+				
+				table.insert(typeSeparate, type)
+				if ((argument.type == "int" or argument.type == "decimal") and argument.maxLength and argument.minLength) then 
+					local valid = if argument.minLength > argument.maxLength then "min > max" elseif argument.maxLength < argument.minLength then "max < min" else nil
+					assert(not valid, `Command #{index}, Argument #{argumentIndex} has invalid range ({valid})`)
+				end 
+			end
 		end 
 	end
 
@@ -270,6 +275,13 @@ function module:processCommand(player: Player, message: string)
 	local arguments = split
 	table.remove(arguments, 1)
 
+	local rank = 0
+	for _,playerRank: rankType in next, self.rankList do 
+		if playerRank.userId ~= player.UserId then continue end 
+		rank = playerRank.rank 
+		break
+	end
+
 	local foundCommand: commandType 
 	for _,command in next, self.commands do 
 		if not table.find(command.aliases, requestedCommand) then continue end
@@ -278,8 +290,10 @@ function module:processCommand(player: Player, message: string)
 	end 
 	if not foundCommand then return end
 
+	if foundCommand.rank > rank then sendMessage("You do not have permission to run this command", player) return end 
+
 	local processedArguments, fail = processArguments(player, arguments, foundCommand.arguments, foundCommand.separateArguments)
-	if fail then sendMessage(message, player) return end 
+	if fail then sendMessage(processedArguments, player) return end 
 
 	foundCommand.execute(self, player, unpack(processedArguments))
 end 
@@ -313,5 +327,4 @@ function module:destroy()
 	table.remove(sharedTable.activeInstances, ourIndex)
 end 
 
---// Return module
 return module
