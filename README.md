@@ -67,5 +67,26 @@ The first argument for the `execute` function is the admin-instance, with a func
 }
 ```
 
+Certain arguments such as `int` and `decimal` can have additional data such as maxLength and minLength using `additionalArgumentData`
+```lua
+local command = {
+	aliases = {"range", "r"},
+	execute = function(self, player, argument1)
+		print("Number is", argument1)
+	end,
+	arguments = {
+		{
+			type = "int",
+			additionalArgumentData = {
+				maxLength = 5,
+				minLength = -5
+			}
+		}	
+	},
+	rank = 0
+}
+```
+If a -6 is given, `argument1` will be -5, and similar for the other way around
+
 The module also includes a `removeRank` function, which works similarly  
 AdminSys works on executors, roblox client and server scripts
