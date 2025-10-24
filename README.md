@@ -45,7 +45,7 @@ Currently adminSys supports 5 types of argument types:
 | team | "guards" | {AbdAsync (Instance)} |
 
 Alternatively if your command can use two different argument types, you can do "player|int"
-The first argument for the `execute` function is the admin-instance, with a function named `addRank` which uses a userid (player) for the first argument and number (rank) for second, example:
+The first argument for the `execute` function is the admin-instance, with a function named `setRank` which uses a userid (player) for the first argument and number (rank) for second, example:
 ```lua
   local command = {
 	aliases = {"rank", "r"},
@@ -66,3 +66,5 @@ The first argument for the `execute` function is the admin-instance, with a func
 	rank = 999
 }
 ```
+
+The module also includes a `removeRank` function, which works similarly
