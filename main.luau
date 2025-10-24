@@ -236,7 +236,7 @@ function module.init(name: string, commands: commandsListType, rankList: rankLis
 	end
 
 	for _,instance: adminInstance in next, sharedTable.activeInstances do 
-		if instance.name ~= name then continue end     
+		if typeof(instance) ~= "table" or instance.name ~= name then continue end     
 		warn("An admin instance with the same name was found and was overwritten")
 		instance:destroy()
 	end
