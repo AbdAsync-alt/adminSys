@@ -127,7 +127,9 @@ local function sendMessage(message: string, player: Player?) --// Might be an od
 	
 	pcall(function() 
 		if player then
-			generalChat:SendAsync("/w "..player.DisplayName)
+			coroutine.wrap(function() 
+				generalChat:SendAsync("/w "..player.DisplayName)
+			end)()
 
 			local start = os.clock()
 			local channel: TextChannel
