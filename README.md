@@ -51,7 +51,7 @@ The first argument for the `execute` function is the admin-instance, with a func
 	aliases = {"rank", "r"},
 	execute = function(self, player, argument1, argument2)
 		local target = argument1[1]
-		self:addRank(target.UserId, argument2)
+		self:setRank(target.UserId, argument2)
 	end,
 	arguments = {
 		{
@@ -68,3 +68,4 @@ The first argument for the `execute` function is the admin-instance, with a func
 ```
 
 The module also includes a `removeRank` function, which works similarly
+AdminSys works on executors, roblox client and server scripts
