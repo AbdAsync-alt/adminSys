@@ -164,6 +164,7 @@ local function processArguments(player: Player, input: inputArguments, arguments
 			end 
 
 			result = processFunction(inputString, addionalArgumentData)
+			if result then break end
 		end 
 
 		if (not result and argument.required) then return `Arugment {index} is not the proper type!`, true end 
