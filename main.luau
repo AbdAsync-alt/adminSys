@@ -211,7 +211,7 @@ function module.init(name: string, commands: commandsListType, rankList: rankLis
 			assert(type == "string", `Command #{index} has alias with type {aliasType} instead of string`)
 		end 
 
-		if not command.arguments then continue end 
+		if not command.arguments then command.arguments = {} continue end 
 		
 		local separateArguments = {}
 		command.separateArguments = separateArguments
