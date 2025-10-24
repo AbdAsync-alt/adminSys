@@ -44,14 +44,14 @@ Currently adminSys supports 5 types of argument types:
 | string | "Hello_world" | "Hello world" |
 | team | "guards" | {AbdAsync (Instance)} |
 
-Alternatively if your command can use two different argument types, you can do "player|int"
+Alternatively if your command can use two different argument types, you can do "player|int"  
 The first argument for the `execute` function is the admin-instance, with a function named `setRank` which uses a userid (player) for the first argument and number (rank) for second, example:
 ```lua
   local command = {
 	aliases = {"rank", "r"},
 	execute = function(self, player, argument1, argument2)
 		local target = argument1[1]
-		self:addRank(target.UserId, argument2)
+		self:setRank(target.UserId, argument2)
 	end,
 	arguments = {
 		{
@@ -67,4 +67,5 @@ The first argument for the `execute` function is the admin-instance, with a func
 }
 ```
 
-The module also includes a `removeRank` function, which works similarly
+The module also includes a `removeRank` function, which works similarly  
+AdminSys works on executors, roblox client and server scripts
