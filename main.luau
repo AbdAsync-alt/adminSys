@@ -34,6 +34,7 @@ type commandType = {
 	rank: number
 }
 
+
 type commandsListType = {commandType}
 
 type adminInstance = {
@@ -319,6 +320,10 @@ function module:removeRank(userId: number)
 		table.remove(self.rankList, index)
 		break
 	end
+end 
+
+function module:sendMessage(message: string, player: Player?)
+	sendMessage(message, player)
 end 
 
 function module:destroy()
