@@ -4,7 +4,7 @@ This is a simple admin system i made for personal roblox scripts, but i decided 
 # How to use
 The main `.init` function takes 4 arguments: name, command-list, rank-list and prefix, everything must be properly formatted
 
-## Commands
+# Commands
 Example of one command
 ```lua
   local name = "admin"
@@ -35,6 +35,7 @@ Example of one command
   adminSys.init(name, {command}, ranks, prefix)
 ```
 
+# Arguments
 Currently adminSys supports 5 types of argument types:
 | Argument | input | output |
 | --- | --- | --- |
@@ -45,6 +46,28 @@ Currently adminSys supports 5 types of argument types:
 | team | "guards" | {AbdAsync (Instance)} |
 
 Alternatively if your command can use two different argument types, you can do "player|int"  
+Certain arguments such as `int` and `decimal` can have additional data such as maxLength and minLength using `additionalArgumentData`
+```lua
+local command = {
+	aliases = {"range", "r"},
+	execute = function(self, player, argument1)
+		print("Number is", argument1)
+	end,
+	arguments = {
+		{
+			type = "int",
+			additionalArgumentData = {
+				maxLength = 5,
+				minLength = -5
+			}
+		}	
+	},
+	rank = 0
+}
+```
+If a -6 is given, `argument1` will be -5, and similar for the other way around
+
+# Functions
 The first argument for the `execute` function is the admin-instance, with a function named `setRank` which uses a userid (player) for the first argument and number (rank) for second, example:
 ```lua
   local command = {
@@ -67,26 +90,9 @@ The first argument for the `execute` function is the admin-instance, with a func
 }
 ```
 
-Certain arguments such as `int` and `decimal` can have additional data such as maxLength and minLength using `additionalArgumentData`
-```lua
-local command = {
-	aliases = {"range", "r"},
-	execute = function(self, player, argument1)
-		print("Number is", argument1)
-	end,
-	arguments = {
-		{
-			type = "int",
-			additionalArgumentData = {
-				maxLength = 5,
-				minLength = -5
-			}
-		}	
-	},
-	rank = 0
-}
-```
-If a -6 is given, `argument1` will be -5, and similar for the other way around
+The module also includes a `removeRank` function, which works similarly to `setRank`  
+Aswell as `sendMessage`, which takes two arguments, `message` (string) and `player` (player?), this function will post a message in chat or through a private channel 
 
-The module also includes a `removeRank` function, which works similarly  
 AdminSys works on executors, roblox client and server scripts
+
+
