@@ -98,8 +98,8 @@ function argumentProcess.player(input: string, additionalArgumentData: additiona
 		playerList = {player}
 	else
 		for _,otherPlayer in next, players:GetPlayers() do
-			if player.Name:find(input) or player.DisplayName:find(input) then
-				table.insert(playerList, player)
+			if otherPlayer.Name:find(input) or otherPlayer.DisplayName:find(input) then
+				table.insert(playerList, otherPlayer)
 			end
 		end
 	end
