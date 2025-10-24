@@ -109,7 +109,7 @@ function argumentProcess.player(input: string, additionalArgumentData: additiona
 end
 
 function argumentProcess.string(input: string)
-	return input:gsub("_", " ")
+	return input:gsub("-", " ")
 end
 
 function argumentProcess.team(input: string)
